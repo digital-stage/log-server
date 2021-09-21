@@ -7,10 +7,10 @@
   "author": "Tobias Hegemann",
   "license": "MIT",
   "scripts": {
-    "dev": "nodemon --watch './src/**/*.ts' --exec 'ts-node' ./src/index.ts",
+    "dev": "nodemon --exec npx ts-node ./src/index.ts",
     "build": "tsc",
     "lint": "npx eslint --fix ./src --ext .js,.ts",
-    "start": "NODE_ENV=production node ./dist/index.js"
+    "start": "NODE_ENV=production node ./dist/index.js",
   },
   "devDependencies": {
     "@types/node": "^16.9.4",
