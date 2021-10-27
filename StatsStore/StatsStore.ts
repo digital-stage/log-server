@@ -22,6 +22,7 @@
 
 import { Client } from '@elastic/elasticsearch'
 import { ClientLogEvents, ClientLogPayloads } from '@digitalstage/api-types'
+import util from 'util'
 
 const OPEN_SEARCH_URI = 'http://localhost:9200'
 
@@ -93,10 +94,13 @@ class StatsStore {
     public addStateEntry = async ( event: string, document: ClientLogPayloads.PeerConnecting | ClientLogPayloads.PeerConnected 
         | ClientLogPayloads.PeerDisconnected | ClientLogPayloads.PeerIceFailed ) => {
         try {
+            this.updateEmail(document.deviceId)
+            const targetEmail = await this.getEmail(document.targetDeviceId)
+
             let response = await this._elasticSearchClient.index({
                 id: `${document.deviceId}-${document.targetDeviceId}`,
                 index: STATE_INDEX_NAME,
-                body: { ...document, event: event }
+                body: { ...document, targetEmail: targetEmail, event: event }
             })
 
             console.debug(`Received Response for adding document to state index: ${response.body}`)
@@ -113,6 +117,53 @@ class StatsStore {
         } catch (err) {
             console.log(`Clear failed: ${err}`)
         }
+    }
+
+    private updateEmail = async (deviceId: string) => {
+        const { body } = await this._elasticSearchClient.search({
+            index: 'state',
+            body: {
+              query: {
+                match: {
+                  targetDeviceId: deviceId
+                }
+              }
+            }
+          })
+
+        console.log(`update ${util.inspect(body.hits, false, null, true)}`)
+
+        if (body.hits.total.value != 0) {
+            body.hits.hits.forEach(async (hit) => {
+                await this._elasticSearchClient.update({
+                    index: 'state',
+                    id: hit._id,
+                    body: {
+                        script: {
+                            lang: 'painless',
+                            source: `ctx._source.targetEmail = "${hit._source.email}"`
+                        }
+                    }
+                })
+            })
+        }
+    }
+
+    private getEmail = async (targetDeviceId: string) => {
+        const { body } = await this._elasticSearchClient.search({
+            index: 'state',
+            body: {
+              query: {
+                match: {
+                  deviceId: targetDeviceId
+                }
+              }
+            }
+          })
+
+        console.log(`get ${util.inspect(body.hits, false, null, true)}`)
+
+        return body.hits.hits.email
     }
 
 }
