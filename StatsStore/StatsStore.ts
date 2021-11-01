@@ -67,9 +67,12 @@ class StatsStore {
         catch(err) {
             console.debug(`Creating state index failed: ${err}`)
         }
+
+        try {
+            this.createStatsDataStream()
         }
         catch(err) {
-            console.debug(`Creating index failed: ${err}`)
+            console.debug(`Creating stats data stream failed: ${err}`)
         }
     }
 
@@ -118,6 +121,19 @@ class StatsStore {
             await this._elasticSearchClient.indices.delete({
                 index: [STATE_INDEX_NAME]
             })
+        }
+        catch(err) {
+            console.log(`state index delete failed: ${err}`)
+        }
+        
+        try {
+            this.clearStatsDataStream()
+        } catch (err) {
+            console.log(`Clear failed: ${err}`)
+        }
+
+        try {
+            this.init()
         } catch (err) {
             console.log(`Clear failed: ${err}`)
         }
@@ -171,9 +187,101 @@ class StatsStore {
         return body.hits.hits[0] ? body.hits.hits[0].email : ''
     }
 
+    private clearStatsDataStream = async () => {
+        try {
+            await this._elasticSearchClient.indices.deleteDataStream({
+                name: 'stats-datastream'
+            })
+        }
+        catch(err) {
+            console.log(`Cannot delete data stream: ${err}`)
+        }
+
+        try {
+            await this._elasticSearchClient.indices.deleteIndexTemplate({
+                name: 'index-template-stats'
+            })
+        }
+        catch(err) {
+            console.log(`Cannot delete index template: ${err}`)
+        }
+
+        try {
+            await this._elasticSearchClient.cluster.deleteComponentTemplate({
+                name: 'mappings-stats'
+            })
+        }
+        catch(err) {
+            console.log(`Cannot delete component template: ${err}`)
+        }
+
+        try {
+            await this._elasticSearchClient.ilm.deleteLifecycle({
+                policy: 'statsPolicy'
+            })
+        }
+        catch(err) {
+            console.log(`Cannot delete component template: ${err}`)
+        }
     }
 
-}
+    private createStatsDataStream = async () => {
+        try {
+            await this._elasticSearchClient.cluster.putComponentTemplate({
+                name: 'mappings-stats',
+                create: true,
+                body: {
+                    'template': {
+                        'mappings': {
+                            'properties': {
+                                '@timestamp': {
+                                    'type': 'date',
+                                    'format': 'date_optional_time||epoch_millis'
+                                },
+                                'message': {
+                                    'type': 'object'
+                                }
+                            }
+                        }
+                    },
+                    '_meta': {
+                        'description': 'Mappings for @timestamp in stats'
+                    }
+                }
+            })
+        }
+        catch(err) {
+            console.debug(`Cannot create component template ${err}`)
+        }
 
+        try {
+            await this._elasticSearchClient.indices.putIndexTemplate({
+                name: 'index-template-stats',
+                create: true,
+                body: {
+                    'index_patterns': 'stats-*',
+                    'data_stream': {},
+                    'composed_of': ['mappings-stats'],
+                    'priority': 500,
+                    '_meta': {
+                        'description': 'Template for stats'
+                    }
+                }
+            })
+        }
+        catch(err) {
+            // console.debug(`Cannot create index template ${err}`)
+        }
+
+        try {
+            await this._elasticSearchClient.indices.createDataStream({
+                name: 'stats-datastream'
+            })
+        }
+        catch(err) {
+            // console.debug(`Cannot create data stream ${err}`)
+        }
+    }
+}
 
 export { StatsStore }
