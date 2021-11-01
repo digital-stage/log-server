@@ -24,6 +24,9 @@ import express from 'express'
 import { ClientLogEvents, ClientLogPayloads } from '@digitalstage/api-types'
 import { StatsStore } from '../StatsStore/StatsStore'
 import { exit } from 'process'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const init = async () => {
     const app = express()
