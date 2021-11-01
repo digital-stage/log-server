@@ -75,7 +75,7 @@ class StatsStore {
 
     public addReadyState = async ( document: ClientLogPayloads.Ready ) => {
         try {
-            let response = await this._elasticSearchClient.index({
+            this._elasticSearchClient.index({
                 id: document.deviceId,
                 index: STATE_INDEX_NAME,
                 body: { ...document, 'event': ClientLogEvents.Ready }
@@ -103,13 +103,11 @@ class StatsStore {
             this.updateEmail(document.deviceId)
             const targetEmail = await this.getEmail(document.targetDeviceId)
 
-            let response = await this._elasticSearchClient.index({
+            this._elasticSearchClient.index({
                 id: `${document.deviceId}-${document.targetDeviceId}`,
                 index: STATE_INDEX_NAME,
                 body: { ...document, targetEmail: targetEmail, event: event }
             })
-
-            console.debug(`Received Response for adding document to state index: ${response.body}`)
         } catch (err) {
             console.error(`Adding a document to state index failed: ${err}`)
         }
@@ -117,8 +115,8 @@ class StatsStore {
 
     public clear = async () => {
         try {
-            let response = await this._elasticSearchClient.indices.delete({
-                index: [STATS_INDEX_NAME, STATE_INDEX_NAME]
+            await this._elasticSearchClient.indices.delete({
+                index: [STATE_INDEX_NAME]
             })
         } catch (err) {
             console.log(`Clear failed: ${err}`)
