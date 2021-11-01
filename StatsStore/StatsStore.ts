@@ -135,20 +135,23 @@ class StatsStore {
             }
           })
 
-        console.log(`update ${util.inspect(body.hits, false, null, true)}`)
-
         if (body.hits.total.value != 0) {
             body.hits.hits.forEach(async (hit) => {
-                await this._elasticSearchClient.update({
-                    index: 'state',
-                    id: hit._id,
-                    body: {
-                        script: {
-                            lang: 'painless',
-                            source: `ctx._source.targetEmail = "${hit._source.email}"`
+                try {
+                    await this._elasticSearchClient.update({
+                        index: 'state',
+                        id: hit._id,
+                        body: {
+                            script: {
+                                lang: 'painless',
+                                source: `ctx._source.targetEmail = "${hit._source.email}"`
+                            }
                         }
-                    }
-                })
+                    })
+                }
+                catch(err) {
+                    // Skip. Most probably it's a version conflict when we update the same document multiple times due to multiple stats coming at once. 
+                }
             })
         }
     }
@@ -165,9 +168,9 @@ class StatsStore {
             }
           })
 
-        console.log(`get ${util.inspect(body.hits, false, null, true)}`)
+        return body.hits.hits[0] ? body.hits.hits[0].email : ''
+    }
 
-        return body.hits.hits.email
     }
 
 }
