@@ -90,10 +90,14 @@ class StatsStore {
 
     public addStatsEntry = async ( deviceId: string, document: ClientLogPayloads.PeerStats ) => { 
         try {
-            let responseStats = await this._elasticSearchClient.index({
-                id: `${document.deviceId}-${document.targetDeviceId}`,
-                index: STATS_INDEX_NAME,
-                body: document
+            const peerConnection = document.stats as any
+
+            await this._elasticSearchClient.index({
+                index: `stats-datastream-${document.deviceId}-${document.targetDeviceId}`,
+                body: {
+                    '@timestamp': peerConnection.RTCPeerConnection.timestamp,
+                    stats: document
+                }
             })
         } catch (err) {
             console.error(`Adding a document to stats index failed: ${err}`)
