@@ -25,6 +25,7 @@ import { ClientLogEvents, ClientLogPayloads } from '@digitalstage/api-types'
 import { StatsStore } from '../StatsStore/StatsStore'
 import { exit } from 'process'
 import dotenv from 'dotenv'
+import * as cors from 'cors'
 
 dotenv.config()
 
@@ -33,6 +34,7 @@ const init = async () => {
     const port = 3001
     
     app.use(express.text())
+    app.use(cors({ origin: true }))
 
     let stats = new StatsStore()
     stats.init()
