@@ -78,7 +78,7 @@ const init = async () => {
     app.post(`/${ClientLogEvents.PeerStats}`, async (req, reply) => {
         const payload = JSON.parse(req.body as string) as ClientLogPayloads.PeerStats
 
-        console.log(`${payload.email}'s device ${payload.deviceId} has a connection to another user's device ${payload.targetDeviceId} and send some interessting statistics:`)
+        console.log(`${payload.email}'s device ${payload.deviceId} has a connection to another user's device ${payload.targetDeviceId} and send some interessting statistics.`)
 
         await stats.addStatsEntry(payload.deviceId, payload)
 
