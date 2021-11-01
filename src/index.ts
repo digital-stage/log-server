@@ -25,7 +25,7 @@ import { ClientLogEvents, ClientLogPayloads } from '@digitalstage/api-types'
 import { StatsStore } from '../StatsStore/StatsStore'
 import { exit } from 'process'
 import dotenv from 'dotenv'
-import * as cors from 'cors'
+import cors from 'cors'
 
 dotenv.config()
 
