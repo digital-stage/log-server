@@ -53,15 +53,20 @@ class StatsStore {
         }
 
         try {
-            await this._elasticSearchClient.indices.create({
-                index: STATS_INDEX_NAME,
-                body: settings
+            const stateExistsResponse = await this._elasticSearchClient.indices.exists({
+                index: STATE_INDEX_NAME
             })
 
-            await this._elasticSearchClient.indices.create({
-                index: STATE_INDEX_NAME,
-                body: settings
-            })
+            if (stateExistsResponse.body != true) {
+                await this._elasticSearchClient.indices.create({
+                    index: STATE_INDEX_NAME,
+                    body: settings
+                })
+            }
+        }
+        catch(err) {
+            console.debug(`Creating state index failed: ${err}`)
+        }
         }
         catch(err) {
             console.debug(`Creating index failed: ${err}`)
