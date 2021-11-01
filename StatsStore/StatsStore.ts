@@ -24,8 +24,6 @@ import { Client } from '@elastic/elasticsearch'
 import { ClientLogEvents, ClientLogPayloads } from '@digitalstage/api-types'
 import util from 'util'
 
-const OPEN_SEARCH_URI = 'http://localhost:9200'
-
 const STATS_INDEX_NAME = 'stats'
 const STATE_INDEX_NAME = 'state'
 
@@ -34,9 +32,12 @@ class StatsStore {
     
     constructor() {
         this._elasticSearchClient = new Client({
-            node: OPEN_SEARCH_URI,
-            ssl: {
-                rejectUnauthorized: false
+            cloud: {
+                id: process.env.ES_ID
+            },
+            auth: {
+                username: process.env.ES_USER,
+                password: process.env.ES_PASS
             }
         })
     }
