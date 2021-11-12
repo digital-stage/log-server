@@ -44,38 +44,38 @@ const init = async () => {
         exit()
     })
 
-    app.post(`/${ClientLogEvents.PeerConnecting}`, async (req, reply) => {
-        const payload = JSON.parse(req.body as string) as ClientLogPayloads.PeerStats
-        console.log(`${payload.email}'s device ${payload.deviceId} connecting to another user's device ${payload.targetDeviceId} ...`)
+    app.post(`/${ClientLogEvents.RTCSignalingStateChanged}`, async (req, reply) => {
+        const payload = JSON.parse(req.body as string) as ClientLogPayloads.RTCSignalingStateChanged
+        console.log(`${payload.email}'s device ${payload.deviceId} with ${payload.targetDeviceId} RTC signaling state changed to ${payload.state}`)
 
-        stats.addStateEntry(ClientLogEvents.PeerConnecting, payload)
-
-        return reply.status(200)
-    })
-
-    app.post(`/${ClientLogEvents.PeerConnected}`, async (req, reply) => {
-        const payload = JSON.parse(req.body as string) as ClientLogPayloads.PeerStats
-        console.log(`${payload.email}'s device ${payload.deviceId} connected with another user's device ${payload.targetDeviceId}`)
-
-        stats.addStateEntry(ClientLogEvents.PeerConnected, payload)
+        await stats.onRTCSignalingStateChange(payload)
 
         return reply.status(200)
     })
 
-    app.post(`/${ClientLogEvents.PeerDisconnected}`, async (req, reply) => {
-        const payload = JSON.parse(req.body as string) as ClientLogPayloads.PeerDisconnected
-        console.log(`${payload.email}'s device ${payload.deviceId} disconnected from another user's device ${payload.targetDeviceId}`)
+    app.post(`/${ClientLogEvents.RTCIceConnectionStateChanged}`, async (req, reply) => {
+        const payload = JSON.parse(req.body as string) as ClientLogPayloads.RTCIceConnectionStateChanged
+        console.log(`${payload.email}'s device ${payload.deviceId} with ${payload.targetDeviceId} RTC ICE connection state changed to ${payload.state}`)
 
-        stats.addStateEntry(ClientLogEvents.PeerDisconnected, payload)
+        await stats.onRTCIceConnectionStateChange(payload)
 
         return reply.status(200)
     })
 
-    app.post(`/${ClientLogEvents.PeerIceFailed}`, async (req, reply) => {
-        const payload = JSON.parse(req.body as string) as ClientLogPayloads.PeerIceFailed
-        console.log(`${payload.email}'s device ${payload.deviceId} failed to process ICE with another user's device ${payload.targetDeviceId}, reason: ${payload.reason}`)
+    app.post(`/${ClientLogEvents.RTCPeerConnectionStateChanged}`, async (req, reply) => {
+        const payload = JSON.parse(req.body as string) as ClientLogPayloads.RTCPeerConnectionStateChanged
+        console.log(`${payload.email}'s device ${payload.deviceId} with ${payload.targetDeviceId} RTC peer connection state changed to ${payload.state}`)
 
-        stats.addStateEntry(ClientLogEvents.PeerIceFailed, payload)
+        await stats.onRTCPeerConnectionStateChange(payload)
+
+        return reply.status(200)
+    })
+
+    app.post(`/${ClientLogEvents.IceCandidateError}`, async (req, reply) => {
+        const payload = JSON.parse(req.body as string) as ClientLogPayloads.IceCandidateError
+        console.log(`${payload.email}'s device ${payload.deviceId} failed to process ICE with another user's device ${payload.targetDeviceId}, reason: ${payload.error}`)
+
+        await stats.onIceCandidateError(payload)
 
         return reply.status(200)
     })
