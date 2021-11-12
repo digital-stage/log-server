@@ -115,7 +115,7 @@ class StatsStore {
                     await this._elasticSearchClient.index({
                         id: id,
                         index: STATE_INDEX_NAME,
-                        body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "" }
+                        body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "", connectionBetween: id }
                     })
                 }                
     
