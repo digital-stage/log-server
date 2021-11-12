@@ -76,18 +76,6 @@ class StatsStore {
         }
     }
 
-    public addReadyState = async ( document: ClientLogPayloads.Ready ) => {
-        try {
-            this._elasticSearchClient.index({
-                id: document.deviceId,
-                index: STATE_INDEX_NAME,
-                body: { ...document, 'event': ClientLogEvents.Ready }
-            })
-        } catch (err) {
-            console.error(`Adding a document to stats index failed: ${err}`)
-        }
-    }
-
     public addStatsEntry = async ( deviceId: string, document: ClientLogPayloads.PeerStats ) => { 
         try {
             const peerConnection = document.stats as any
