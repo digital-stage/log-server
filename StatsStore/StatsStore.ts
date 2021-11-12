@@ -94,6 +94,21 @@ class StatsStore {
 
     private onStateChange = async ( state: string, field: string, document: ClientLogPayloads.RTCSignalingStateChanged | ClientLogPayloads.RTCIceConnectionStateChanged | 
         ClientLogPayloads.RTCPeerConnectionStateChanged | ClientLogPayloads.IceCandidateError ) => {
+            const id = `${document.deviceId}-${document.targetDeviceId}`
+    
+            try {
+                const { body } = await this._elasticSearchClient.search({
+                    index: STATE_INDEX_NAME,
+                    body: {
+                      query: {
+                        match: {
+                          _id: id                        
+                        }
+                      }
+                    }
+                })
+
+                if (body.hits.total.value === 0) {
                     this.updateEmail(document.deviceId)
                     const targetEmail = await this.getEmail(document.targetDeviceId)
 
@@ -102,6 +117,7 @@ class StatsStore {
                         index: STATE_INDEX_NAME,
                         body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "" }
                     })
+                }                
     }
 
     }
