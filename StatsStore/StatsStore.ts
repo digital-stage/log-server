@@ -135,8 +135,21 @@ class StatsStore {
                 console.error(`print some error ${err}`)
             }
     }
+
+    public onRTCSignalingStateChange = async ( document: ClientLogPayloads.RTCSignalingStateChanged ) => {
+        await this.onStateChange("signalingStateChange", "state", document)
     }
 
+    public onRTCIceConnectionStateChange = async ( document: ClientLogPayloads.RTCIceConnectionStateChanged ) => {
+        await this.onStateChange("iceConnectionState", "state", document)
+    }
+
+    public onRTCPeerConnectionStateChange = async ( document: ClientLogPayloads.RTCPeerConnectionStateChanged ) => {
+        await this.onStateChange("peerConnectionState", "state", document)
+    }
+    
+    public onIceCandidateError = async ( document: ClientLogPayloads.IceCandidateError ) => {
+        await this.onStateChange("iceCandidateError", "error", document)
     }
 
     public clear = async () => {
