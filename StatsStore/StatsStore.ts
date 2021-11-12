@@ -92,20 +92,18 @@ class StatsStore {
         }
     }
 
-    public addStateEntry = async ( event: string, document: ClientLogPayloads.PeerConnecting | ClientLogPayloads.PeerConnected 
-        | ClientLogPayloads.PeerDisconnected | ClientLogPayloads.PeerIceFailed ) => {
-        try {
-            this.updateEmail(document.deviceId)
-            const targetEmail = await this.getEmail(document.targetDeviceId)
+    private onStateChange = async ( state: string, field: string, document: ClientLogPayloads.RTCSignalingStateChanged | ClientLogPayloads.RTCIceConnectionStateChanged | 
+        ClientLogPayloads.RTCPeerConnectionStateChanged | ClientLogPayloads.IceCandidateError ) => {
+                    this.updateEmail(document.deviceId)
+                    const targetEmail = await this.getEmail(document.targetDeviceId)
 
-            this._elasticSearchClient.index({
-                id: `${document.deviceId}-${document.targetDeviceId}`,
-                index: STATE_INDEX_NAME,
-                body: { ...document, targetEmail: targetEmail, event: event }
-            })
-        } catch (err) {
-            console.error(`Adding a document to state index failed: ${err}`)
-        }
+                    await this._elasticSearchClient.index({
+                        id: id,
+                        index: STATE_INDEX_NAME,
+                        body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "" }
+                    })
+    }
+
     }
 
     public clear = async () => {
