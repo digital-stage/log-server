@@ -80,11 +80,13 @@ class StatsStore {
         try {
             const peerConnection = document.stats as any
 
+            const connectionBetween = `${document.deviceId}-${document.targetDeviceId}`
+
             await this._elasticSearchClient.index({
-                index: `stats-datastream-${document.deviceId}-${document.targetDeviceId}`,
+                index: `stats-datastream-${connectionBetween}}`,
                 body: {
                     '@timestamp': peerConnection.RTCPeerConnection.timestamp,
-                    stats: document
+                    stats: { ...document, connectionBetween: connectionBetween }
                 }
             })
         } catch (err) {
@@ -115,7 +117,7 @@ class StatsStore {
                     await this._elasticSearchClient.index({
                         id: id,
                         index: STATE_INDEX_NAME,
-                        body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "", connectionBetween: id }
+                        body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "" }
                     })
                 }                
     
