@@ -118,6 +118,23 @@ class StatsStore {
                         body: { ...document, targetEmail: targetEmail, signalingStateChange: "", iceConnectionState: "", peerConnectionState: "", iceCandidateError: "" }
                     })
                 }                
+    
+                await this._elasticSearchClient.update({
+                    index: STATE_INDEX_NAME,
+                    id: id,
+                    body: {
+                        script: {
+                            lang: 'painless',
+                            source: `ctx._source.${state} = "${document[field]}"`
+                        }
+                    }
+                })
+            }
+            catch(err) {    
+                // Document not found
+                console.error(`print some error ${err}`)
+            }
+    }
     }
 
     }
