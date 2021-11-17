@@ -81,13 +81,15 @@ class StatsStore {
             const peerConnection = document.stats as any
 
             const connectionBetween = `${document.deviceId}-${document.targetDeviceId}`
+            const totalRoundTripTime = this.getStatFrom(document, "totalRoundTripTime")
+            const jitter = this.getStatFrom(document, "jitter")
             const timestamp = this.getStatFrom(document, "timestamp")
 
             await this._elasticSearchClient.index({
                 index: `stats-datastream-${connectionBetween}}`,
                 body: {
-                    stats: { ...document, connectionBetween: connectionBetween }
                     '@timestamp': timestamp,
+                    stats: { jitter: jitter, totalRoundTripTime: totalRoundTripTime, connectionBetween: connectionBetween, transportStats: peerConnection.RTCTransport_0_1 }
                 }
             })
         } catch (err) {
