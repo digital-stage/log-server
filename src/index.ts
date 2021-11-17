@@ -96,6 +96,12 @@ const init = async () => {
         return reply.status(200)
     })
 
+    app.get('/health', async (req, reply) => {
+        reply.send('Alive')
+        reply.statusMessage = 'Alive'
+        return reply.status(200).end()
+    })
+
     app.listen(port, () => console.log(`Log server - listening at http://localhost:${port}`));
 }
 
