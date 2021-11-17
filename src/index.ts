@@ -50,7 +50,7 @@ const init = async () => {
 
         await stats.onRTCSignalingStateChange(payload)
 
-        return reply.status(200)
+        return reply.status(200).end()
     })
 
     app.post(`/${ClientLogEvents.RTCIceConnectionStateChanged}`, async (req, reply) => {
@@ -59,7 +59,7 @@ const init = async () => {
 
         await stats.onRTCIceConnectionStateChange(payload)
 
-        return reply.status(200)
+        return reply.status(200).end()
     })
 
     app.post(`/${ClientLogEvents.RTCPeerConnectionStateChanged}`, async (req, reply) => {
@@ -68,7 +68,7 @@ const init = async () => {
 
         await stats.onRTCPeerConnectionStateChange(payload)
 
-        return reply.status(200)
+        return reply.status(200).end()
     })
 
     app.post(`/${ClientLogEvents.IceCandidateError}`, async (req, reply) => {
@@ -77,7 +77,7 @@ const init = async () => {
 
         await stats.onIceCandidateError(payload)
 
-        return reply.status(200)
+        return reply.status(200).end()
     })
 
     app.post(`/${ClientLogEvents.PeerStats}`, async (req, reply) => {
@@ -87,13 +87,13 @@ const init = async () => {
 
         await stats.addStatsEntry(payload.deviceId, payload)
 
-        return reply.status(200)
+        return reply.status(200).end()
     })
 
     app.post('/clear', async (req, reply) => {
         await stats.clear()
 
-        return reply.status(200)
+        return reply.status(200).end()
     })
 
     app.get('/health', async (req, reply) => {
