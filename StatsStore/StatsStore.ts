@@ -81,12 +81,13 @@ class StatsStore {
             const peerConnection = document.stats as any
 
             const connectionBetween = `${document.deviceId}-${document.targetDeviceId}`
+            const timestamp = this.getStatFrom(document, "timestamp")
 
             await this._elasticSearchClient.index({
                 index: `stats-datastream-${connectionBetween}}`,
                 body: {
-                    '@timestamp': peerConnection.RTCPeerConnection.timestamp,
                     stats: { ...document, connectionBetween: connectionBetween }
+                    '@timestamp': timestamp,
                 }
             })
         } catch (err) {
@@ -319,6 +320,23 @@ class StatsStore {
         catch(err) {
             // console.debug(`Cannot create data stream ${err}`)
         }
+    }
+
+    private getStatFrom = (obj: any, key: string) => {
+        if(obj.hasOwnProperty(key)) {
+            return obj[key]
+        }
+
+        for (let prop in obj) {
+            if (typeof obj[prop] === "object") {
+                let stat = this.getStatFrom(obj[prop], key)
+                if (stat != null) {
+                    return stat
+                }
+            }
+        }
+
+        return null
     }
 }
 
