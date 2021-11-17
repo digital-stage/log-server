@@ -1,0 +1,9 @@
+version: "3.7"
+
+services:
+  log-server:
+    image: ${CR_BASE:-local}/log-server:${GITVERSION_SEMVER:-latest}
+    build:
+      context: .
+    ports:
+      - "3001:3001"
